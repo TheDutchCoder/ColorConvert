@@ -110,8 +110,6 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 else:
                     str = str[1:]
 
-                print sels
-
                 # Replace the current selection with the rgb value.
                 self.view.replace(edit, sel, self.hexToRgb(str, str_len))
 
