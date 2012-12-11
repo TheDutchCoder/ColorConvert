@@ -13,6 +13,7 @@ import re
 # #f2e094
 # rgb(128, 0, 0)
 # rgb(0, 9, 126)
+# rgba(120, 34, 19, 0.2)
 #
 # To-do:
 #   - color cycling
@@ -89,7 +90,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
             # Define the regular expressions to test hex/rgb(a).
             reg_hex = '^[\#]?([\dabcdefABCDEF]){3,6}'
-            reg_rgb = '^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),?(\s*\d+\s*)?\)$'
+            reg_rgb = '^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),?(\s*(0?.?\d)+\s*)?\)$'
 
             hex_match = re.match(reg_hex, str)
             rgb_match = re.match(reg_rgb, str)
