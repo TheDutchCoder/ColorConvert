@@ -16,7 +16,6 @@ import re
 # rgba(120, 34, 19, 0.2)
 #
 # To-do:
-#   - color cycling
 #   - color name support
 
 
@@ -52,7 +51,23 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         # Return the preformatted string with the new values.
         return 'rgb(%d, %d, %d)' % (val_1, val_2, val_3)
 
-    def rgbToHex(self, rgb_match):
+    def rgbToRgba(self, rgb_match):
+        """Converts an rgb value to an rgba value.
+
+        Attributes:
+            self: The Regionset object.
+            rgb_match: The reg exp collection of matches.
+
+        """
+
+        # If hex is shorthand, convert to a double value first.
+        val_1 = int(rgb_match.group(1), 10)
+        val_2 = int(rgb_match.group(2), 10)
+        val_3 = int(rgb_match.group(3), 10)
+
+        return 'rgba(%d, %d, %d, 1)' % (val_1, val_2, val_3)
+
+    def rgbaToHex(self, rgb_match):
         """Converts an rgb(a) value to a hex value.
 
         Attributes:
@@ -117,6 +132,14 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             # If an rgb value is found, convert it to a hexadecimal number.
             elif rgb_match is not None:
 
-                # Replace the current selection with the hex value.
-                self.view.replace(edit, sel, \
-                                  self.rgbToHex(rgb_match))
+                if rgb_match.group(4) is None:
+
+                        # Replace the current selection with the rgba value.
+                        self.view.replace(edit, sel, \
+                                          self.rgbToRgba(rgb_match))
+
+                else:
+
+                    # Replace the current selection with the hex value.
+                    self.view.replace(edit, sel, \
+                                      self.rgbaToHex(rgb_match))
