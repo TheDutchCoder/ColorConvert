@@ -134,9 +134,9 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
                 if rgb_match.group(4) is None:
 
-                        # Replace the current selection with the rgba value.
-                        self.view.replace(edit, sel, \
-                                          self.rgbToRgba(rgb_match))
+                    # Replace the current selection with the rgba value.
+                    self.view.replace(edit, sel, \
+                                      self.rgbToRgba(rgb_match))
 
                 else:
 
