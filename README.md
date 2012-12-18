@@ -15,5 +15,17 @@ Hit ctrl+shift+c by default to switch between values.
        It will be converted to this: */
     
     color: rgb(242, 6, 69)
+    
+    /* Pressing ctrl+shift+c again will convert to rgba */
+    
+    color: rgba(242, 6, 69, 1)
+    
+    /* Another ctrl+shift+c and you're back at hex */
+    
+    color: #f20645
 
-This also works for rgba values, although the alpha channel won't be stored.
+Please note that alpha channel values will not be stored and will automatically revert to "1".
+
+## To-do
+- Shorthand hex values (e.g. #00ff00, should be #0f0)
+- Color code support (e.g. 'red')
