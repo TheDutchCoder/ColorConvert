@@ -27,5 +27,4 @@ Hit ctrl+shift+c by default (cmd+shift+c on Mac OS) to switch between values.
 Please note that alpha channel values will not be stored and will automatically revert to "1".
 
 ## To-do
-- Shorthand hex values (e.g. #00ff00, should be #0f0)
 - Color code support (e.g. 'red')
