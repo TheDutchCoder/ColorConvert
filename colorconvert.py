@@ -27,18 +27,17 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
     """
 
-    def hexToRgb(self, str, str_len):
+    def hexToRgb(self, str):
         """Converts a hex value to an rgb value.
 
         Attributes:
             self: The Regionset object.
             str: The selected string.
-            str_len: Length of the selected string.
 
         """
 
         # If hex is shorthand, convert to a double value first.
-        if str_len == 3:
+        if len(str) == 3:
             val_1 = (int(str[0:1] * 2, 16))
             val_2 = (int(str[1:2] * 2, 16))
             val_3 = (int(str[2:3] * 2, 16))
@@ -60,7 +59,6 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        # If hex is shorthand, convert to a double value first.
         val_1 = int(rgb_match.group(1), 10)
         val_2 = int(rgb_match.group(2), 10)
         val_3 = int(rgb_match.group(3), 10)
@@ -68,7 +66,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         return 'rgba(%d, %d, %d, 1)' % (val_1, val_2, val_3)
 
     def rgbaToHex(self, rgb_match):
-        """Converts an rgb(a) value to a hex value.
+        """Converts an rgba value to a hex value.
 
         Attributes:
             self: The Regionset object.
@@ -78,11 +76,22 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         # Convert all values to 10-base integers, strip the leading characters,
         # convert to hex and fill with leading zero's.
-        val_1 = hex(int(rgb_match.group(1), 10))[2:].zfill(2)
-        val_2 = hex(int(rgb_match.group(2), 10))[2:].zfill(2)
-        val_3 = hex(int(rgb_match.group(3), 10))[2:].zfill(2)
+        val_1 = int(rgb_match.group(1), 10)
+        val_2 = int(rgb_match.group(2), 10)
+        val_3 = int(rgb_match.group(3), 10)
 
-        # Return the proformatted string with the new values.
+        # But first let's check if it's possible to convert to shorthand hex.
+        if (val_1 % 17 == 0) and (val_2 % 17 == 0) and (val_3 % 17 == 0):
+            val_1 = hex(val_1)[2:3]
+            val_2 = hex(val_2)[2:3]
+            val_3 = hex(val_3)[2:3]
+
+        else:
+            val_1 = hex(val_1)[2:].zfill(2)
+            val_2 = hex(val_2)[2:].zfill(2)
+            val_3 = hex(val_3)[2:].zfill(2)
+
+        # Return the preformatted string with the new values.
         return '#%s%s%s' % (val_1, val_2, val_3)
 
     # Main function.
@@ -105,7 +114,8 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
             # Define the regular expressions to test hex/rgb(a).
             reg_hex = '^[\#]?([\dabcdefABCDEF]){3,6}'
-            reg_rgb = '^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),?(\s*(0?.?\d)+\s*)?\)$'
+            reg_rgb = ('^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),'
+                       '?(\s*(0?.?\d)+\s*)?\)$')
 
             hex_match = re.match(reg_hex, str)
             rgb_match = re.match(reg_rgb, str)
@@ -127,7 +137,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     str = str[1:]
 
                 # Replace the current selection with the rgb value.
-                self.view.replace(edit, sel, self.hexToRgb(str, str_len))
+                self.view.replace(edit, sel, self.hexToRgb(str))
 
             # If an rgb value is found, convert it to a hexadecimal number.
             elif rgb_match is not None:
@@ -135,11 +145,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 if rgb_match.group(4) is None:
 
                     # Replace the current selection with the rgba value.
-                    self.view.replace(edit, sel, \
+                    self.view.replace(edit, sel,
                                       self.rgbToRgba(rgb_match))
 
                 else:
 
                     # Replace the current selection with the hex value.
-                    self.view.replace(edit, sel, \
+                    self.view.replace(edit, sel,
                                       self.rgbaToHex(rgb_match))
