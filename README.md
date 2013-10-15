@@ -27,4 +27,6 @@ Hit ctrl+shift+c by default (cmd+shift+c on Mac OS) to switch between values.
 Please note that alpha channel values will not be stored and will automatically revert to "1".
 
 ## To-do
-- Color code support (e.g. 'red')
+- HSL(a) support
+- Retain alpha channel (if possible)
+- Convert all colors in the document with a shortcut
