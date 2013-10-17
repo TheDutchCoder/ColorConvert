@@ -9,7 +9,7 @@ You can easily install the pluing through Will Bond's excellent Package Control 
 If you want to install this plugin manually for some reason, simply clone this repo into your packages directory (make sure not to put it in the user sub dir).
 
 ## Instructions
-1. Select a color declaration (e.g. '#ff0022', 'rgb(120, 0, 12)', or 'hsla(320, 75%, 10%, 0.2)';
+1. Select a color declaration (e.g. '#ff0022', 'rgb(120, 0, 12)', or 'hsla(320, 75%, 10%, 0.2)')
 2. Hit ctrl+shift+c by default (cmd+shift+c on Mac OS) to convert to the next type (hex -> rgba -> hsla -> hex -> etc).
 
 ## Supported Features
