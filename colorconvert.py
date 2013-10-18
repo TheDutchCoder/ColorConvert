@@ -263,7 +263,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 else:
                     str = str[1:]
 
-                if (str_len == 3):
+                if (len(str) == 3):
                     r = str[0:1] * 2
                     g = str[1:2] * 2
                     b = str[2:3] * 2
