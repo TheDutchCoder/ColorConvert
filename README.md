@@ -13,14 +13,13 @@ If you want to install this plugin manually for some reason, simply clone this r
 2. Hit ctrl+shift+c by default (cmd+shift+c on Mac OS) to convert to the next type (hex -> rgba -> hsla -> hex -> etc).
 
 ## Supported Features
-The following features are supported:
-1. Convert hex values to rgba
-2. Convert rgb(a) values to hsla
-3. Convert hsl(a) values to hex
-4. Remembers the alpha value of a selection (e.g. when 'rgba(120, 0, 12, 0.2)' is converted to any other value, the '0.2' alpha value will be remembered, even if you convert the value to hex)
+- Convert hex values to rgba
+- Convert rgb(a) values to hsla
+- Convert hsl(a) values to hex
+- Remembers the alpha value of a selection (e.g. when 'rgba(120, 0, 12, 0.2)' is converted to any other value, the '0.2' alpha value will be remembered, even if you convert the value to hex)
 
 ## Planned Features
-1. Convert all colors equal to the selected one in the document (milestone 1.2)
+- Convert all colors equal to the selected one in the document (milestone 1.2)
 
 ## Notes
 1. CSS color names (e.g. 'red', 'transparent', etc) are currently not supported (not planning to unless there's a high demand).
