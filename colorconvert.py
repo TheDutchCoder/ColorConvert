@@ -234,7 +234,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             str_len = len(str)
 
             # Define the regular expressions to test hex/rgb(a).
-            reg_hex = '^[\#]?([\dabcdefABCDEF]){3,6}'
+            reg_hex = '^[\#]?([\dabcdefABCDEF]{3}){1,2}$'
             reg_rgb = ('^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),'
                        '?(\s*(0?.?\d)+\s*)?\)$')
             reg_hsl = ('^hsl[a]?\((\s*\d+.?\d+\s*),(\s*\d+.?\d+\%\s*),(\s*\d+.?\d+\%\s*),'
