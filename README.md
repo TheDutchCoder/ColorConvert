@@ -1,7 +1,7 @@
 ColorConvert
 ============
 
-A Sublime Text 2 plugin that converts CSS numerical color values.
+A Sublime Text plugin that converts CSS numerical color values.
 You can convert any hex, rgb(a) or hsl(a) color in the following sequence: hex -> rgba -> hsla -> hex (etc).
 
 ## Installation
