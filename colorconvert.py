@@ -4,7 +4,7 @@
 # Converts CSS colors from hex to rgb(a), from rgb(a) to hsl(a), and from hsl(a)
 # to hex, while preserving alpha channels.
 #
-# More information about color conversions (speifically rgb to hsl and back)
+# More information about color conversions (specifically rgb to hsl and back)
 # can be found here: http://en.wikipedia.org/wiki/HSL_and_HSV#From_HSL
 
 import sublime
