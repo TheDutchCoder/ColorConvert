@@ -276,7 +276,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 # Get the rgb(a) values and output them to the current
                 # selection.
                 rgba_vals = self.hexToRgb(r, g, b)
-                output = 'rgba({}, {}, {}, {})'.format(rgba_vals[0], rgba_vals[1],
+                output = 'rgba(%d, %d, %d, %s)' % (rgba_vals[0], rgba_vals[1],
                                                    rgba_vals[2], rgba_vals[3])
                 self.view.replace(edit, sel, output)
 
@@ -299,7 +299,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 # Get the hsl(a) values and output them to the current
                 # selection.
                 hsla_vals = self.rgbToHsl(r, g, b, a)
-                output = 'hsla({:.1f}, {:.1f}%, {:.1f}%, {})'.format(hsla_vals[0],
+                output = 'hsla(%.1f, %.1f%%, %.1f%%, %s)' % (hsla_vals[0],
                                                              hsla_vals[1],
                                                              hsla_vals[2],
                                                              hsla_vals[3])
@@ -326,5 +326,5 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 rgba_vals = self.hslToRgb(h, s, l, a)
                 hex_vals = self.rgbToHex(rgba_vals[0], rgba_vals[1],
                                          rgba_vals[2], rgba_vals[3])
-                output = '#{}{}{}'.format(hex_vals[0], hex_vals[1], hex_vals[2])
+                output = '#%s%s%s' % (hex_vals[0], hex_vals[1], hex_vals[2])
                 self.view.replace(edit, sel, output)
