@@ -1,12 +1,12 @@
 ColorConvert
 ============
 
-A Sublime Text plugin that converts CSS numerical color values.
+A Sublime Text plug-in that converts CSS numerical color values.
 You can convert any hex, rgb(a) or hsl(a) color in the following sequence: hex -> rgba -> hsla -> hex (etc).
 
 ## Installation
-You can easily install the pluing through Will Bond's excellent Package Control (https://sublime.wbond.net/).
-If you want to install this plugin manually for some reason, simply clone this repo into your packages directory (make sure not to put it in the user sub dir).
+You can easily install the plug-ing through Will Bond's excellent Package Control (https://sublime.wbond.net/).
+If you want to install this plug-in manually for some reason, simply clone this repo into your packages directory (make sure not to put it in the user sub dir).
 
 ## Instructions
 1. Select a color declaration (e.g. '#ff0022', 'rgb(120, 0, 12)', or 'hsla(320, 75%, 10%, 0.2)')
@@ -23,7 +23,7 @@ If you want to install this plugin manually for some reason, simply clone this r
 
 ## Notes
 1. CSS color names (e.g. 'red', 'transparent', etc) are currently not supported (not planning to unless there's a high demand).
-2. Whenever possible, the plugin will output the shorthand hex value (e.g. '#000' instead of '#000000').
+2. Whenever possible, the plug-in will output the shorthand hex value (e.g. '#000' instead of '#000000').
 3. All 'rgb' and 'hsl' values will always be written as 'rgba' and 'hsla'. Every browser that supports rgb/hsl also supports rgba/hsla, so opaque colors simple get an alpha of 1.0.
 4. The output for hsl and alpha channels is in floating point, to ensure a little more accuracy.
 
