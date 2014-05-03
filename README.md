@@ -5,7 +5,7 @@ A Sublime Text plug-in that converts CSS numerical color values.
 You can convert any hex, rgb(a) or hsl(a) color in the following sequence: hex -> rgba -> hsla -> hex (etc).
 
 ## Installation
-You can easily install the plug-ing through Will Bond's excellent Package Control (https://sublime.wbond.net/).
+You can easily install the plug-in through Will Bond's excellent Package Control (https://sublime.wbond.net/).
 If you want to install this plug-in manually for some reason, simply clone this repo into your packages directory (make sure not to put it in the user sub dir).
 
 ## Instructions
