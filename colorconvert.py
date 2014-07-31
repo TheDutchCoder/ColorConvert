@@ -321,7 +321,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             elif hsl_match is not None:
 
                 # Get all the color channels.
-                h = float(hsl_match.group(1))
+                h = float(hsl_match.group(1).strip('%'))
                 s = float(hsl_match.group(2).strip('%'))
                 l = float(hsl_match.group(3).strip('%'))
 
