@@ -12,6 +12,9 @@ import sublime_plugin
 import re
 
 
+alpha = 1.0
+
+
 class colorconvertCommand(sublime_plugin.TextCommand):
     """Converts a CSS color from hex to rgba to hsla to hex (etc).
 
@@ -42,8 +45,6 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         self.s = 0.0
         self.l = 0.0
 
-        self.alpha = 1.0
-
 
     def hexToRgb(self, r, g, b):
         """Converts a hex value to an rgb value.
@@ -60,7 +61,9 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         g = (int(g, 16))
         b = (int(b, 16))
 
-        return [r, g, b, self.alpha]
+        global alpha
+
+        return [r, g, b, alpha]
 
 
     def rgbToHex(self, r, g, b, a):
@@ -79,9 +82,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         g = hex(g)[2:].zfill(2)
         b = hex(b)[2:].zfill(2)
 
+        global alpha
+
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            self.alpha = a
+            alpha = a
 
         # If a short notation is possible, splice the values.
         if (r[0:1] == r[1:2]) and (g[0:1] == g[1:2]) and (b[0:1] == b[1:2]):
@@ -108,9 +113,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         g = float(g) / 255.0
         b = float(b) / 255.0
 
+        global alpha
+
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            self.alpha = a
+            alpha = a
 
         # Calculate the hsl values.
         cmax = max(r, g, b)
@@ -150,7 +157,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         self.s = s
         self.l = l
 
-        return [h, s, l, self.alpha]
+        return [h, s, l, alpha]
 
 
     def hslToRgb(self, h, s, l, a):
@@ -169,9 +176,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         s = float(s) / 100
         l = float(l) / 100
 
+        global alpha
+
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            self.alpha = a
+            alpha = a
 
         # Calculate the rgb values.
         c = (1 - abs((2 * l) - 1)) * s
@@ -212,7 +221,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         g = int((g + m) * 255.0)
         b = int((b + m) * 255.0)
 
-        return [r, g, b, self.alpha]
+        return [r, g, b, alpha]
 
 
     # Main function.
@@ -227,6 +236,8 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         sels = self.view.sel()
 
+        global alpha
+
         for sel in sels:
 
             # Get the selection and its length.
@@ -237,8 +248,8 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             reg_hex = '^[\#]?([\dabcdefABCDEF]{3}){1,2}$'
             reg_rgb = ('^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),'
                        '?(\s*(0?.?\d)+\s*)?\)$')
-            reg_hsl = ('^hsl[a]?\((\s*\d?.?\d+\s*),(\s*\d?.?\d+\%\s*),(\s*\d?.?\d+\%\s*),'
-                       '?(\s*(0?.?\d)+\s*)?\)$')
+            reg_hsl = ('^hsl[a]?\((\s*\d+.?\d?\s*),(\s*\d+.?\d?\%\s*),(\s*\d+.?\d?\%\s*),'
+                       '?(\s*\d+.?\d?\s*)?\)$')
 
             hex_match = re.match(reg_hex, str)
             rgb_match = re.match(reg_rgb, str)
@@ -294,7 +305,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     a = float(rgb_match.group(4))
 
                 else:
-                    a = self.alpha
+                    a = alpha
 
                 # Get the hsl(a) values and output them to the current
                 # selection.
@@ -319,7 +330,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     a = float(hsl_match.group(4))
 
                 else:
-                    a = self.alpha
+                    a = alpha
 
                 # Get the rgb(a) values, then the hex values and output them to
                 # the current selection.
@@ -328,3 +339,30 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                                          rgba_vals[2], rgba_vals[3])
                 output = '#%s%s%s' % (hex_vals[0], hex_vals[1], hex_vals[2])
                 self.view.replace(edit, sel, output)
+
+
+class colorconvertEvents(sublime_plugin.EventListener):
+    """Event listener for the ColorConvert plugin.
+
+    Attributes:
+        sublime_plugin.EventListener: Sublime Text class basis.
+
+    """
+
+    def on_selection_modified(self, view):
+        """Listener for selection change.
+
+        Attributes:
+            self: The colorconvertCommand object.
+            view: The current view.
+
+        """
+
+        sels = view.sel()
+
+        global alpha
+
+        # If the selection changed to a 'cursor' (e.g. no selection at all)
+        # then we reset the alpha channel.
+        if len(sels) is 1 and sels[0].empty():
+            alpha = 1.0
