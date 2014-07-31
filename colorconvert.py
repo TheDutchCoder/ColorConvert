@@ -237,7 +237,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             reg_hex = '^[\#]?([\dabcdefABCDEF]{3}){1,2}$'
             reg_rgb = ('^rgb[a]?\((\s*\d+\s*),(\s*\d+\s*),(\s*\d+\s*),'
                        '?(\s*(0?.?\d)+\s*)?\)$')
-            reg_hsl = ('^hsl[a]?\((\s*\d+.?\d+\s*),(\s*\d+.?\d+\%\s*),(\s*\d+.?\d+\%\s*),'
+            reg_hsl = ('^hsl[a]?\((\s*\d?.?\d+\s*),(\s*\d?.?\d+\%\s*),(\s*\d?.?\d+\%\s*),'
                        '?(\s*(0?.?\d)+\s*)?\)$')
 
             hex_match = re.match(reg_hex, str)
