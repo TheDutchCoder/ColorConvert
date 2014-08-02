@@ -10,7 +10,20 @@
 import sublime
 import sublime_plugin
 import re
+import math
 
+# Global color channel values.
+_hr = None
+_hg = None
+_hb = None
+
+_r = None
+_g = None
+_b = None
+
+_h = None
+_s = None
+_l = None
 
 alpha = 1.0
 
@@ -33,20 +46,40 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        # Store the view and color channels. The channels are used for
-        # calculating with non-rounded floats.
+        # Store the view.
         self.view = view
 
-        self.r = 0
-        self.g = 0
-        self.b = 0
 
-        self.h = 0.0
-        self.s = 0.0
-        self.l = 0.0
+    def hueToRgb(self, v1, v2, vH):
+        """Assists with converting hsl to rgb values.
+
+        Attributes:
+            self: The Regionset object.
+            v1:   The first part of the hsl collection
+            v2:   The second part of the hsl collection
+            vH:   The thrid part of the hsl collection
+
+        """
+
+        if vH < 0:
+            vH += 1
+
+        if vH > 1:
+            vH -= 1
+
+        if ((6 * vH) < 1):
+            return (v1 + (v2 - v1) * 6 * vH)
+
+        if ((2 * vH) < 1):
+            return v2
+
+        if ((3 * vH) < 2):
+            return (v1 + (v2 - v1) * ((2 / 3) - vH) * 6)
+
+        return v1
 
 
-    def hexToRgb(self, r, g, b):
+    def hexToRgb(self, hr, hg, hb):
         """Converts a hex value to an rgb value.
 
         Attributes:
@@ -57,11 +90,21 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        r = (int(r, 16))
-        g = (int(g, 16))
-        b = (int(b, 16))
+        global _r
+        global _g
+        global _b
 
         global alpha
+
+        r = (int(hr, 16))
+        g = (int(hg, 16))
+        b = (int(hb, 16))
+
+        if _r is None:
+
+            _r = r
+            _g = g
+            _b = b
 
         return [r, g, b, alpha]
 
@@ -78,15 +121,16 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        r = hex(r)[2:].zfill(2)
-        g = hex(g)[2:].zfill(2)
-        b = hex(b)[2:].zfill(2)
-
         global alpha
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
             alpha = a
+
+        # Convert the channels' values to hex values.
+        r = hex(r)[2:].zfill(2)
+        g = hex(g)[2:].zfill(2)
+        b = hex(b)[2:].zfill(2)
 
         # If a short notation is possible, splice the values.
         if (r[0:1] == r[1:2]) and (g[0:1] == g[1:2]) and (b[0:1] == b[1:2]):
@@ -109,15 +153,19 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        r = float(r) / 255.0
-        g = float(g) / 255.0
-        b = float(b) / 255.0
+        global _h
+        global _s
+        global _l
 
         global alpha
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
             alpha = a
+
+        r = float(r) / 255.0
+        g = float(g) / 255.0
+        b = float(b) / 255.0
 
         # Calculate the hsl values.
         cmax = max(r, g, b)
@@ -151,11 +199,12 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         s = s * 100.0
         l = l * 100.0
 
-        # Store the hsl values globally, so we can use the unrounded versions
-        # to convert them back.
-        self.h = h
-        self.s = s
-        self.l = l
+        # Store the hsl values globally.
+        if _h is None:
+
+            _h = h
+            _s = s
+            _l = l
 
         return [h, s, l, alpha]
 
@@ -172,54 +221,40 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
+        global alpha
+
         h = float(h)
         s = float(s) / 100
         l = float(l) / 100
-
-        global alpha
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
             alpha = a
 
-        # Calculate the rgb values.
-        c = (1 - abs((2 * l) - 1)) * s
-        x = c * (1 - abs(((h / 60.0) % 2) - 1))
-        m = l - (c / 2)
+        # Unsaturated colors have equal rgb channels.
+        if s is 0:
+            r = l * 255
+            g = l * 255
+            b = l * 255
 
-        if (h >= 0) and (h < 60):
-            r = c
-            g = x
-            b = 0
+        # Magic :)
+        else:
 
-        elif (h >= 60) and (h < 120):
-            r = x
-            g = c
-            b = 0
+            if l < 0.5:
+                var_2 = l * (1 + s)
 
-        elif (h >= 120) and (h < 180):
-            r = 0
-            g = c
-            b = x
+            else:
+                var_2 = (l + s) - (s * l)
 
-        elif (h >= 180) and (h < 240):
-            r = 0
-            g = x
-            b = c
+            var_1 = 2 * l - var_2
 
-        elif (h >= 240) and (h < 300):
-            r = x
-            g = 0
-            b = c
+            r = 255 * self.hueToRgb(var_1, var_2, (h + (1 / 3)))
+            g = 255 * self.hueToRgb(var_1, var_2, h)
+            b = 255 * self.hueToRgb(var_1, var_2, (h - (1 / 3)))
 
-        elif (h >= 300) and (h < 360):
-            r = c
-            g = 0
-            b = x
-
-        r = int((r + m) * 255.0)
-        g = int((g + m) * 255.0)
-        b = int((b + m) * 255.0)
+        r = int(math.ceil(r))
+        g = int(math.ceil(g))
+        b = int(math.ceil(b))
 
         return [r, g, b, alpha]
 
@@ -236,6 +271,22 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         sels = self.view.sel()
 
+        # Global values for the hex parts of rgb.
+        global _hr
+        global _hg
+        global _hb
+
+        # Global values for rgb channels.
+        global _r
+        global _g
+        global _b
+
+        # Global values for the hsl channels.
+        global _h
+        global _s
+        global _l
+
+        # Global values for the alpha channel.
         global alpha
 
         for sel in sels:
@@ -284,9 +335,23 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     g = str[2:4]
                     b = str[4:6]
 
-                # Get the rgb(a) values and output them to the current
-                # selection.
-                rgba_vals = self.hexToRgb(r, g, b)
+                # Store the hex channel values globally.
+                if _hr is None:
+                    _hr = r
+                    _hg = g
+                    _hb = b
+
+                # If global rgb values are present, use those for speed and
+                # accuracy. Otherwise convert the values.
+                if _r is not None:
+
+                    rgba_vals = [_r, _g, _b, alpha]
+
+                else:
+
+                    rgba_vals = self.hexToRgb(_hr, _hg, _hb)
+
+                # Write the output to the selection.
                 output = 'rgba(%d, %d, %d, %s)' % (rgba_vals[0], rgba_vals[1],
                                                    rgba_vals[2], rgba_vals[3])
                 self.view.replace(edit, sel, output)
@@ -300,6 +365,12 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 g = int(rgb_match.group(2), 10)
                 b = int(rgb_match.group(3), 10)
 
+                # Store the rgb channel values globally.
+                if _r is None:
+                    _r = r
+                    _g = g
+                    _b = b
+
                 # If applicable, also get the alpha channel.
                 if (rgb_match.group(4) is not None):
                     a = float(rgb_match.group(4))
@@ -307,9 +378,17 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 else:
                     a = alpha
 
-                # Get the hsl(a) values and output them to the current
-                # selection.
-                hsla_vals = self.rgbToHsl(r, g, b, a)
+                # If global hsl values are present, use those for speed and
+                # accuracy. Otherwise convert the values.
+                if _h is not None:
+
+                    hsla_vals = [_h, _s, _l, alpha]
+
+                else:
+
+                    hsla_vals = self.rgbToHsl(r, g, b, a)
+
+                # Write the output to the selection.
                 output = 'hsla(%.1f, %.1f%%, %.1f%%, %s)' % (hsla_vals[0],
                                                              hsla_vals[1],
                                                              hsla_vals[2],
@@ -325,6 +404,12 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 s = float(hsl_match.group(2).strip('%'))
                 l = float(hsl_match.group(3).strip('%'))
 
+                # Store the hsl channel values globally.
+                if _h is None:
+                    _h = h
+                    _s = s
+                    _l = l
+
                 # If applicable, also get the alpha channel.
                 if (hsl_match.group(4) is not None):
                     a = float(hsl_match.group(4))
@@ -332,11 +417,27 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 else:
                     a = alpha
 
-                # Get the rgb(a) values, then the hex values and output them to
-                # the current selection.
-                rgba_vals = self.hslToRgb(h, s, l, a)
-                hex_vals = self.rgbToHex(rgba_vals[0], rgba_vals[1],
-                                         rgba_vals[2], rgba_vals[3])
+                # If global hex or rgb values are present, use those for speed
+                # and accuracy. Otherwise convert the values.
+                if _hr is not None:
+
+                    hex_vals = [_hr, _hg, _hb, alpha]
+
+                else:
+
+                    if _r is not None:
+
+                        rgba_vals = [_r, _g, _b, alpha]
+
+                    else:
+
+                        rgba_vals = self.hslToRgb(h, s, l, a)
+
+
+                    hex_vals = self.rgbToHex(rgba_vals[0], rgba_vals[1],
+                                             rgba_vals[2], rgba_vals[3])
+                
+                # Write the output to the selection.
                 output = '#%s%s%s' % (hex_vals[0], hex_vals[1], hex_vals[2])
                 self.view.replace(edit, sel, output)
 
@@ -360,9 +461,34 @@ class colorconvertEvents(sublime_plugin.EventListener):
 
         sels = view.sel()
 
+        global _hr
+        global _hg
+        global _hb
+
+        global _r
+        global _g
+        global _b
+
+        global _h
+        global _s
+        global _l
+
         global alpha
 
         # If the selection changed to a 'cursor' (e.g. no selection at all)
-        # then we reset the alpha channel.
+        # then we reset the global values.
         if len(sels) is 1 and sels[0].empty():
+
+            _hr = None
+            _hg = None
+            _hb = None
+
+            _r = None
+            _g = None
+            _b = None
+
+            _h = None
+            _s = None
+            _l = None
+
             alpha = 1.0
