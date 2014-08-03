@@ -12,6 +12,7 @@ import sublime_plugin
 import re
 import math
 
+
 # Global color channel values.
 _hr = None
 _hg = None
@@ -25,7 +26,8 @@ _h = None
 _s = None
 _l = None
 
-alpha = 1.0
+_alpha = 1.0
+_alpha_enabled = True
 
 
 class colorconvertCommand(sublime_plugin.TextCommand):
@@ -48,6 +50,12 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         # Store the view.
         self.view = view
+
+        # Load settings
+        settings = sublime.load_settings("colorconvert.sublime-settings")
+        settings.add_on_change("enable_alpha", loadSettings)
+
+        loadSettings()
 
 
     def hueToRgb(self, v1, v2, vH):
@@ -94,7 +102,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         global _g
         global _b
 
-        global alpha
+        global _alpha
 
         r = (int(hr, 16))
         g = (int(hg, 16))
@@ -106,7 +114,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             _g = g
             _b = b
 
-        return [r, g, b, alpha]
+        return [r, g, b, _alpha]
 
 
     def rgbToHex(self, r, g, b, a):
@@ -121,11 +129,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        global alpha
+        global _alpha
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            alpha = a
+            _alpha = a
 
         # Convert the channels' values to hex values.
         r = hex(r)[2:].zfill(2)
@@ -157,11 +165,11 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         global _s
         global _l
 
-        global alpha
+        global _alpha
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            alpha = a
+            _alpha = a
 
         r = float(r) / 255.0
         g = float(g) / 255.0
@@ -206,7 +214,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
             _s = s
             _l = l
 
-        return [h, s, l, alpha]
+        return [h, s, l, _alpha]
 
 
     def hslToRgb(self, h, s, l, a):
@@ -221,7 +229,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         """
 
-        global alpha
+        global _alpha
 
         h = float(h)
         s = float(s) / 100
@@ -229,7 +237,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
 
         # Get the alpha channel and store it globally (if present).
         if a is not None:
-            alpha = a
+            _alpha = a
 
         # Unsaturated colors have equal rgb channels.
         if s is 0:
@@ -256,7 +264,7 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         g = int(math.ceil(g))
         b = int(math.ceil(b))
 
-        return [r, g, b, alpha]
+        return [r, g, b, _alpha]
 
 
     # Main function.
@@ -287,7 +295,8 @@ class colorconvertCommand(sublime_plugin.TextCommand):
         global _l
 
         # Global values for the alpha channel.
-        global alpha
+        global _alpha
+        global _alpha_enabled
 
         for sel in sels:
 
@@ -345,15 +354,24 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                 # accuracy. Otherwise convert the values.
                 if _r is not None:
 
-                    rgba_vals = [_r, _g, _b, alpha]
+                    rgba_vals = [_r, _g, _b, _alpha]
 
                 else:
 
                     rgba_vals = self.hexToRgb(_hr, _hg, _hb)
 
                 # Write the output to the selection.
-                output = 'rgba(%d, %d, %d, %s)' % (rgba_vals[0], rgba_vals[1],
-                                                   rgba_vals[2], rgba_vals[3])
+                if _alpha_enabled is True:
+
+                    output = 'rgba(%d, %d, %d, %s)' % (rgba_vals[0],
+                                                       rgba_vals[1],
+                                                       rgba_vals[2],
+                                                       rgba_vals[3])
+                else:
+
+                    output = 'rgba(%d, %d, %d)' % (rgba_vals[0], rgba_vals[1],
+                                                   rgba_vals[2])
+
                 self.view.replace(edit, sel, output)
 
 
@@ -376,23 +394,32 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     a = float(rgb_match.group(4))
 
                 else:
-                    a = alpha
+                    a = _alpha
 
                 # If global hsl values are present, use those for speed and
                 # accuracy. Otherwise convert the values.
                 if _h is not None:
 
-                    hsla_vals = [_h, _s, _l, alpha]
+                    hsla_vals = [_h, _s, _l, _alpha]
 
                 else:
 
                     hsla_vals = self.rgbToHsl(r, g, b, a)
 
                 # Write the output to the selection.
-                output = 'hsla(%.1f, %.1f%%, %.1f%%, %s)' % (hsla_vals[0],
+                if _alpha_enabled is True:
+
+                    output = 'hsla(%.1f, %.1f%%, %.1f%%, %s)' % (hsla_vals[0],
+                                                                 hsla_vals[1],
+                                                                 hsla_vals[2],
+                                                                 hsla_vals[3])
+
+                else:
+
+                    output = 'hsla(%.1f, %.1f%%, %.1f%%)' % (hsla_vals[0],
                                                              hsla_vals[1],
-                                                             hsla_vals[2],
-                                                             hsla_vals[3])
+                                                             hsla_vals[2])
+
                 self.view.replace(edit, sel, output)
 
 
@@ -415,19 +442,19 @@ class colorconvertCommand(sublime_plugin.TextCommand):
                     a = float(hsl_match.group(4))
 
                 else:
-                    a = alpha
+                    a = _alpha
 
                 # If global hex or rgb values are present, use those for speed
                 # and accuracy. Otherwise convert the values.
                 if _hr is not None:
 
-                    hex_vals = [_hr, _hg, _hb, alpha]
+                    hex_vals = [_hr, _hg, _hb, _alpha]
 
                 else:
 
                     if _r is not None:
 
-                        rgba_vals = [_r, _g, _b, alpha]
+                        rgba_vals = [_r, _g, _b, _alpha]
 
                     else:
 
@@ -473,7 +500,7 @@ class colorconvertEvents(sublime_plugin.EventListener):
         global _s
         global _l
 
-        global alpha
+        global _alpha
 
         # If the selection changed to a 'cursor' (e.g. no selection at all)
         # then we reset the global values.
@@ -492,3 +519,18 @@ class colorconvertEvents(sublime_plugin.EventListener):
             _l = None
 
             alpha = 1.0
+
+
+def loadSettings():
+    """Loads settings from the .sublime-settings file
+
+    Attributes:
+        sublime_plugin.EventListener: Sublime Text class basis.
+
+    """
+    
+    global _alpha_enabled
+
+    settings = sublime.load_settings("colorconvert.sublime-settings")
+
+    _alpha_enabled = settings.get("enable_alpha")
