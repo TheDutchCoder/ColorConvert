@@ -24,8 +24,7 @@ If you want to install this plug-in manually for some reason, simply clone this 
 ## Notes
 1. CSS color names (e.g. 'red', 'transparent', etc) are currently not supported (not planning to unless there's a high demand).
 2. Whenever possible, the plug-in will output the shorthand hex value (e.g. '#000' instead of '#000000').
-3. All 'rgb' and 'hsl' values will always be written as 'rgba' and 'hsla'. Every browser that supports rgb/hsl also supports rgba/hsla, so opaque colors simple get an alpha of 1.0.
-4. The output for hsl and alpha channels is in floating point, to ensure a little more accuracy.
+3. The output for hsl and alpha channels is in floating point, to ensure a little more accuracy.
 
 ## Examples
 ```css
